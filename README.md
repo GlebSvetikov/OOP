@@ -114,3 +114,106 @@ classDiagram
     BriefProduct ..> ProductValidator : uses
 ```
 
+## Полная диаграмма классов приложения
+```mermaid
+classDiagram
+    class IProductRepository {
+        <<interface>>
+        +getById(id: int): Product
+        +get_k_n_short_list(k: int, n: int, sortField: str): List[BriefProduct]
+        +addProduct(product: Product)
+        +replaceProduct(id: int, newProduct: Product)
+        +deleteProduct(id: int)
+        +get_count(): int
+        +sort_by_field(field: str)
+    }
+
+    class AbstractProductRepository {
+        <<abstract>>
+        #products: List[Product]
+        #filename: str
+        #serializationStrategy: SerializationStrategy
+        +AbstractProductRepository(filename: str, strategy: SerializationStrategy)
+        +readFromFile()
+        +writeToFile()
+        +getById(id: int): Product
+        +get_k_n_short_list(k: int, n: int, sortField: str): List[BriefProduct]
+        +addProduct(product: Product)
+        +replaceProduct(id: int, newProduct: Product)
+        +deleteProduct(id: int)
+        +get_count(): int
+        +sort_by_field(field: str)
+        #generateNewId(): int
+    }
+
+    class ProductRepository {
+        +ProductRepository(filename: str, strategy: SerializationStrategy)
+    }
+
+    class ProductRepositoryAdapter {
+        -fileRepository: AbstractProductRepository
+        +ProductRepositoryAdapter(fileRepository: AbstractProductRepository)
+        +getById(id: int): Product
+        +get_k_n_short_list(k: int, n: int, sortField: str): List[BriefProduct]
+        +addProduct(product: Product)
+        +replaceProduct(id: int, newProduct: Product)
+        +deleteProduct(id: int)
+        +get_count(): int
+        +sort_by_field(field: str)
+    }
+
+    class SerializationStrategy {
+        <<interface>>
+        +readFromFile(filename: str): List[Product]
+        +writeToFile(filename: str, products: List[Product])
+    }
+
+    class AbstractSerializationStrategy {
+        <<abstract>>
+        #objectMapper: Any
+        +readFromFile(filename: str): List[Product]
+        +writeToFile(filename: str, products: List[Product])
+        #createObjectMapper()*: Any
+    }
+
+    class JsonSerializationStrategy {
+        #read_data(file): List[dict]
+        #write_data(file, data: List[dict])
+    }
+
+    class YamlSerializationStrategy {
+        #read_data(file): List[dict]
+        #write_data(file, data: List[dict])
+    }
+
+    class Product_rep_DB {
+        -connection: PostgreSQLConnection
+        +Product_rep_DB()
+        +getById(id: int): Product
+        +get_k_n_short_list(k: int, n: int, sortField: str): List[BriefProduct]
+        +addProduct(product: Product)
+        +replaceProduct(id: int, newProduct: Product)
+        +deleteProduct(id: int)
+        +get_count(): int
+        +sort_by_field(field: str)
+    }
+
+    class PostgreSQLConnection {
+        -instance: PostgreSQLConnection
+        -connection: Connection
+        -PostgreSQLConnection()
+        +getInstance(): PostgreSQLConnection
+        +getConnection(): Connection
+        +close()
+    }
+
+    AbstractProductRepository <|-- ProductRepository : extends
+    IProductRepository <|.. ProductRepositoryAdapter : implements
+    ProductRepositoryAdapter --> AbstractProductRepository : uses
+    AbstractProductRepository --> SerializationStrategy : uses
+    SerializationStrategy <|.. AbstractSerializationStrategy : implements
+    AbstractSerializationStrategy <|-- JsonSerializationStrategy : extends
+    AbstractSerializationStrategy <|-- YamlSerializationStrategy : extends
+    IProductRepository <|.. Product_rep_DB : implements
+    Product_rep_DB --> PostgreSQLConnection : uses
+```
