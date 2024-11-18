@@ -1,134 +1,142 @@
 # --*-- encoding: cp1251 --*--
-from decimal import Decimal
 import json
-import uuid
+from decimal import Decimal
 
 class BriefProduct:
-    def __init__(self, product_id, name, price):
-        self._product_id = product_id
-        self._name = name
-        self._price = price
+    def __init__(self, product_id: int, name: str, price: Decimal, product_code: str):
+        self.product_id = product_id
+        self.name = name
+        self.price = price
+        self.product_code = product_code
+        BriefProduct.validate_product_code(product_code)
 
-    def get_product_id(self):
-        return self._product_id
+    @staticmethod
+    def validate_product_code(product_code: str):
+        if not (isinstance(product_code, str) and product_code.isdigit() and len(product_code) == 6):
+            raise ValueError("Product code must be a string of 6 digits.")
 
-    def get_name(self):
-        return self._name
+    def __eq__(self, other):
+        if not isinstance(other, BriefProduct):
+            return False
+        return (self.product_id == other.product_id and
+                self.name == other.name and
+                self.price == other.price and
+                self.product_code == other.product_code)
 
-    def get_price(self):
-        return self._price
-
-    def __str__(self):
-        return f"BriefProduct(id={self._product_id}, name={self._name}, price={self._price})"
+    def brief(self):
+        return f"BriefProduct(product_id={self.product_id}, name={self.name}, price={self.price})"
 
 
 class Product(BriefProduct):
-    def __init__(self, product_id, name, description, price, stock_quantity, material):
-        super().__init__(product_id, name, price)
-        self._unique_id = self._generate_unique_id()
-        self._description = None
-        self._stock_quantity = None
-        self._material = None
+    def __init__(self, product_id: int, name: str = "", description: str = "", price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "", product_code: str = ""):
+        super().__init__(product_id, name, price, product_code)
+        self.description = description
+        self.stock_quantity = stock_quantity
+        self.material = material
 
-        self.set_description(description)
-        self.set_stock_quantity(stock_quantity)
-        self.set_material(material)
+    @property
+    def description(self):
+        return self._description
 
-    def _generate_unique_id(self):
-        return uuid.uuid4().hex[:8]
+    @description.setter
+    def description(self, value: str):
+        if not isinstance(value, str) or not value:
+            raise ValueError("Description must be a non-empty string.")
+        self._description = value
 
-    def _validate_and_set(self, field_name, value, validation_method):
-        if validation_method(value):
-            setattr(self, field_name, value)
+    @property
+    def stock_quantity(self):
+        return self._stock_quantity
 
-    @staticmethod
-    def validate_product_id(product_id):
-        if isinstance(product_id, int) and product_id > 0:
-            return True
-        raise ValueError("Invalid product ID")
+    @stock_quantity.setter
+    def stock_quantity(self, value: int):
+        if not isinstance(value, int) or value < 0:
+            raise ValueError("Stock quantity must be a non-negative integer.")
+        self._stock_quantity = value
 
-    @staticmethod
-    def validate_name(name):
-        if isinstance(name, str) and len(name) > 0:
-            return True
-        raise ValueError("Invalid name")
+    @property
+    def material(self):
+        return self._material
 
-    @staticmethod
-    def validate_description(description):
-        if isinstance(description, str):
-            return True
-        raise ValueError("Invalid description")
-
-    @staticmethod
-    def validate_price(price):
-        if isinstance(price, Decimal) and price >= 0:
-            return True
-        raise ValueError("Invalid price")
-
-    @staticmethod
-    def validate_stock_quantity(stock_quantity):
-        if isinstance(stock_quantity, int) and stock_quantity >= 0:
-            return True
-        raise ValueError("Invalid stock quantity")
-
-    @staticmethod
-    def validate_material(material):
-        if isinstance(material, str) and len(material) > 0:
-            return True
-        raise ValueError("Invalid material")
-
-    def set_product_id(self, product_id):
-        self._validate_and_set('_product_id', product_id, self.validate_product_id)
-
-    def set_name(self, name):
-        self._validate_and_set('_name', name, self.validate_name)
-
-    def set_description(self, description):
-        self._validate_and_set('_description', description, self.validate_description)
-
-    def set_price(self, price):
-        self._validate_and_set('_price', price, self.validate_price)
-
-    def set_stock_quantity(self, stock_quantity):
-        self._validate_and_set('_stock_quantity', stock_quantity, self.validate_stock_quantity)
-
-    def set_material(self, material):
-        self._validate_and_set('_material', material, self.validate_material)
+    @material.setter
+    def material(self, value: str):
+        if not isinstance(value, str) or not value:
+            raise ValueError("Material must be a non-empty string.")
+        self._material = value
 
     @classmethod
-    def from_string(cls, data_str):
-        data = json.loads(data_str)
+    def create_new_product(cls, product_id: int, name: str, description: str, price: Decimal, stock_quantity: int, material: str, product_code: str):
+        return cls(product_id=product_id, name=name, description=description, price=price, stock_quantity=stock_quantity, material=material, product_code=product_code)
+
+    @classmethod
+    def create_from_string(cls, product_string: str):
+        parts = product_string.split(",")
+        if len(parts) != 7:
+            raise ValueError("Invalid product string format. Expected 7 comma-separated values.")
+        try:
+            return cls(
+                product_id=int(parts[0].strip()),
+                name=parts[1].strip(),
+                description=parts[2].strip(),
+                price=Decimal(parts[3].strip()),
+                stock_quantity=int(parts[4].strip()),
+                material=parts[5].strip(),
+                product_code=parts[6].strip()
+            )
+        except ValueError as e:
+            raise ValueError("Invalid number format in product string.") from e
+
+    @classmethod
+    def create_from_json(cls, json_string: str):
+        data = json.loads(json_string)
         return cls(
-            data['product_id'],
-            data['name'],
-            data['description'],
-            Decimal(data['price']),
-            data['stock_quantity'],
-            data['material']
+            product_id=data['product_id'],
+            name=data['name'],
+            description=data['description'],
+            price=Decimal(data['price']),
+            stock_quantity=data['stock_quantity'],
+            material=data['material'],
+            product_code=data['product_code']
         )
 
-    @classmethod
-    def from_json(cls, json_str):
-        return cls.from_string(json_str)
+    def to_json(self) -> str:
+        return json.dumps({
+            'product_id': self.product_id,
+            'name': self.name,
+            'description': self.description,
+            'price': str(self.price),
+            'stock_quantity': self.stock_quantity,
+            'material': self.material,
+            'product_code': self.product_code
+        }, ensure_ascii=False)
 
     def __str__(self):
-        return f"Product(id={self.get_product_id()}, name={self.get_name()}, description={self._description}, " \
-               f"price={self.get_price()}, stock_quantity={self._stock_quantity}, material={self._material}, " \
-               f"unique_id={self._unique_id})"
-
-    def brief(self):
-        return super().__str__()
-
-    def __eq__(self, other):
-        if isinstance(other, Product):
-            return self.get_product_id() == other.get_product_id() and self._unique_id == other._unique_id
-        return False
+        return f"Product(product_id={self.product_id}, name='{self.name}', description='{self.description}', price={self.price}, stockQuantity={self.stock_quantity}, material='{self.material}', productCode='{self.product_code}')"
 
 
-product = Product(1, "Gold ring", "A beautiful gold ring", Decimal("399.99"), 1, "Gold")
-print(product)
-print(product.brief())
-
-json_str = '{"product_id": 2, "name": "Silver Necklace", "description": "Elegant silver necklace", "price": "199.99", "stock_quantity": 30, "material": "Silver"}'
-product_from_json = Product.from_json(json_str)
-print(product_from_json)
+if __name__ == "__main__":
+    try:
+        product1 = Product.create_new_product(
+            product_id=1,
+            name="Золотое кольцо",
+            description="Кольцо с изумрудом",
+            price=Decimal("15000.00"),
+            stock_quantity=1,
+            material="Золото",
+            product_code="123456"
+        )
+        product2 = Product.create_new_product(
+            product_id=2,
+            name="Сереброяное кольцо",
+            description="Кольцо с сапфиром",
+            price=Decimal("10000.00"),
+            stock_quantity=2,
+            material="Серебро",
+            product_code="123457"
+        )
+        print(product1.brief())
+        print(product1)
+        print(product2.brief())
+        print(product2)
+    except ValueError as e:
+        print("Ошибка:", e)
