@@ -1,34 +1,65 @@
-# --*-- encoding: cp1251 --*--
 import json
 from decimal import Decimal
+from typing import Optional
 
 class BriefProduct:
-    def __init__(self, product_id: int, name: str, price: Decimal, product_code: str):
+    def __init__(self, product_id: Optional[int] = None, name: str = "", price: Decimal = Decimal(0), product_code: str = ""):
         self.product_id = product_id
         self.name = name
         self.price = price
         self.product_code = product_code
-        BriefProduct.validate_product_code(product_code)
 
-    @staticmethod
-    def validate_product_code(product_code: str):
-        if not (isinstance(product_code, str) and product_code.isdigit() and len(product_code) == 6):
+    @property
+    def product_id(self):
+        return self._product_id
+
+    @product_id.setter
+    def product_id(self, value: Optional[int]):
+        if value is not None and (not isinstance(value, int) or value < 0):
+            raise ValueError("Product ID must be a non-negative integer or None.")
+        self._product_id = value
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value: str):
+        if not isinstance(value, str) or not value:
+            raise ValueError("Name must be a non-empty string.")
+        self._name = value
+
+    @property
+    def price(self):
+        return self._price
+
+    @price.setter
+    def price(self, value: Decimal):
+        if not isinstance(value, Decimal) or value < 0:
+            raise ValueError("Price must be a non-negative decimal.")
+        self._price = value
+
+    @property
+    def product_code(self):
+        return self._product_code
+
+    @product_code.setter
+    def product_code(self, value: str):
+        if not (isinstance(value, str) and value.isdigit() and len(value) == 6):
             raise ValueError("Product code must be a string of 6 digits.")
+        self._product_code = value
 
     def __eq__(self, other):
         if not isinstance(other, BriefProduct):
             return False
-        return (self.product_id == other.product_id and
-                self.name == other.name and
-                self.price == other.price and
+        return (
                 self.product_code == other.product_code)
 
     def brief(self):
         return f"BriefProduct(product_id={self.product_id}, name={self.name}, price={self.price})"
 
-
 class Product(BriefProduct):
-    def __init__(self, product_id: int, name: str = "", description: str = "", price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "", product_code: str = ""):
+    def __init__(self, product_id: Optional[int] = None, name: str = "", description: str = "", price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "", product_code: str = ""):
         super().__init__(product_id, name, price, product_code)
         self.description = description
         self.stock_quantity = stock_quantity
@@ -65,7 +96,7 @@ class Product(BriefProduct):
         self._material = value
 
     @classmethod
-    def create_new_product(cls, product_id: int, name: str, description: str, price: Decimal, stock_quantity: int, material: str, product_code: str):
+    def create_new_product(cls, product_id: Optional[int] = None, name: str = "", description: str = "", price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "", product_code: str = ""):
         return cls(product_id=product_id, name=name, description=description, price=price, stock_quantity=stock_quantity, material=material, product_code=product_code)
 
     @classmethod
@@ -75,7 +106,7 @@ class Product(BriefProduct):
             raise ValueError("Invalid product string format. Expected 7 comma-separated values.")
         try:
             return cls(
-                product_id=int(parts[0].strip()),
+                product_id=int(parts[0].strip()) if parts[0].strip() else None,
                 name=parts[1].strip(),
                 description=parts[2].strip(),
                 price=Decimal(parts[3].strip()),
@@ -90,7 +121,7 @@ class Product(BriefProduct):
     def create_from_json(cls, json_string: str):
         data = json.loads(json_string)
         return cls(
-            product_id=data['product_id'],
+            product_id=data.get('product_id'),
             name=data['name'],
             description=data['description'],
             price=Decimal(data['price']),
@@ -111,32 +142,32 @@ class Product(BriefProduct):
         }, ensure_ascii=False)
 
     def __str__(self):
-        return f"Product(product_id={self.product_id}, name='{self.name}', description='{self.description}', price={self.price}, stockQuantity={self.stock_quantity}, material='{self.material}', productCode='{self.product_code}')"
-
+        return (f"Product(product_id={self.product_id}, name='{self.name}', description='{self.description}', "
+                f"price={self.price}, stockQuantity={self.stock_quantity}, material='{self.material}', productCode='{self.product_code}')")
 
 if __name__ == "__main__":
     try:
         product1 = Product.create_new_product(
-            product_id=1,
-            name="Золотое кольцо",
-            description="Кольцо с изумрудом",
+            name="Gold ring",
+            description="abc",
             price=Decimal("15000.00"),
             stock_quantity=1,
-            material="Золото",
+            material="Gold",
             product_code="123456"
         )
         product2 = Product.create_new_product(
             product_id=2,
-            name="Сереброяное кольцо",
-            description="Кольцо с сапфиром",
+            name="Silver ring",
+            description="bdc",
             price=Decimal("10000.00"),
             stock_quantity=2,
-            material="Серебро",
-            product_code="123457"
+            material="Silver",
+            product_code="123456"
         )
+        print(product1 == product2)
         print(product1.brief())
         print(product1)
         print(product2.brief())
         print(product2)
     except ValueError as e:
-        print("Ошибка:", e)
+        print("Error:", e)
