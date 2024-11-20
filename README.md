@@ -59,6 +59,8 @@ erDiagram
 
 ## Выбранная таблица для дальнейшей работы:
 **Таблица PRODUCT - Товар**
+
+## Диаграмма классов
 ![image](https://github.com/user-attachments/assets/07682da9-8107-4426-bb1d-949f911666fe)
 
 
