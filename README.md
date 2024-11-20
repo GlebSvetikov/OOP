@@ -59,5 +59,35 @@ erDiagram
 
 ## Выбранная таблица для дальнейшей работы:
 **Таблица PRODUCT - Товар**
-![image](https://github.com/user-attachments/assets/8273a618-1555-4f42-9342-d1cc8128c54e)
+class BriefProduct {
+    - product_id: Optional<int>
+    - name: str
+    - price: Decimal
+    - product_code: str
+
+    + __init__(product_id: Optional[int], name: str, price: Decimal, product_code: str)
+    + product_id: Optional[int]
+    + name: str
+    + price: Decimal
+    + product_code: str
+    + brief() : str
+    + __eq__(other: object) : bool
+}
+
+class Product {
+    - description: str
+    - stock_quantity: int
+    - material: str
+
+    + __init__(product_id: Optional[int], name: str, description: str, price: Decimal, stock_quantity: int, material: str, product_code: str)
+    + create_new_product(product_id: Optional[int], name: str, description: str, price: Decimal, stock_quantity: int, material: str, product_code: str) : Product
+    + create_from_string(product_string: str) : Product
+    + create_from_json(json_string: str) : Product
+    + to_json() : str
+    + __str__() : str
+}
+
+BriefProduct <|-- Product
+
+@enduml
 
