@@ -1,13 +1,14 @@
 import json
 from decimal import Decimal
+from itertools import product
 from typing import Optional
 
 class BriefProduct:
     def __init__(self, product_id: Optional[int] = None, name: str = "", price: Decimal = Decimal(0), product_code: str = ""):
-        self.product_id = product_id
-        self.name = name
-        self.price = price
-        self.product_code = product_code
+        self._product_id = product_id
+        self._name = name
+        self._price = price
+        self._product_code = product_code
 
     @property
     def product_id(self):
@@ -61,9 +62,9 @@ class BriefProduct:
 class Product(BriefProduct):
     def __init__(self, product_id: Optional[int] = None, name: str = "", description: str = "", price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "", product_code: str = ""):
         super().__init__(product_id, name, price, product_code)
-        self.description = description
-        self.stock_quantity = stock_quantity
-        self.material = material
+        self._description = description
+        self._stock_quantity = stock_quantity
+        self._material = material
 
     @property
     def description(self):
@@ -164,6 +165,7 @@ if __name__ == "__main__":
             material="Silver",
             product_code="123456"
         )
+        product1.price = Decimal("100000.00")
         print(product1 == product2)
         print(product1.brief())
         print(product1)
