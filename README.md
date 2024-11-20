@@ -35,7 +35,7 @@ erDiagram
 
 ## Описание таблиц
 
-1. **CUSTOMER (Клиент)**:
+**1. **CUSTOMER (Клиент)**:
    - customer_id: уникальный идентификатор клиента (первичный ключ)
    - last_name, first_name, middle_name: ФИО клиента
    - birth_date: дата рождения клиента
@@ -114,5 +114,5 @@ classDiagram
     BriefProduct <|-- Product : extends
     Product ..> ProductValidator : uses
     BriefProduct ..> ProductValidator : uses
-```
+```**
 
