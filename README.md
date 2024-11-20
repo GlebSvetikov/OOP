@@ -59,4 +59,5 @@ erDiagram
 
 ## Выбранная таблица для дальнейшей работы:
 **Таблица PRODUCT - Товар**
+![image](https://github.com/user-attachments/assets/8273a618-1555-4f42-9342-d1cc8128c54e)
 
