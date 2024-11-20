@@ -20,6 +20,7 @@ erDiagram
         decimal price
         int stock_quantity
         string material
+        int product_code
     }
 
     PURCHASE {
@@ -29,7 +30,6 @@ erDiagram
         date purchase_date
         int quantity
         decimal total_cost
-        int product_code
     }
 ```
 
