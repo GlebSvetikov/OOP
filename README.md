@@ -29,6 +29,7 @@ erDiagram
         date purchase_date
         int quantity
         decimal total_cost
+        int product_code
     }
 ```
 
@@ -46,7 +47,7 @@ erDiagram
    - price: цена товара
    - stock_quantity: количество товара на складе
    - material: материал изделия
-   - unique_id: уникальный номер товара (8 символов)
+   - product_code: уникальный номер товара (6 символов)
 
 3. **PURCHASE (Покупка)**:
    - purchase_id: уникальный идентификатор покупки (первичный ключ)
