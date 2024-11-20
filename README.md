@@ -20,7 +20,7 @@ erDiagram
         decimal price
         int stock_quantity
         string material
-        int product_code
+        str product_code
     }
 
     PURCHASE {
