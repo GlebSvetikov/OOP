@@ -82,4 +82,21 @@ class ProductRepDB:
             self.connection.commit()
             return cursor.rowcount > 0
 
+    def delete_by_id(self, product_id):
+        with self.connection.cursor() as cursor:
+            sql = "DELETE FROM products WHERE product_id = %s"
+            cursor.execute(sql, (product_id,))
+            self.connection.commit()
+            return cursor.rowcount > 0
+
+    def get_count(self):
+        with self.connection.cursor() as cursor:
+            sql = "SELECT COUNT(*) AS count FROM products"
+            cursor.execute(sql)
+            result = cursor.fetchone()
+            return result['count'] if result else 0
+
+    def close(self):
+        self.connection.close()
+
 
