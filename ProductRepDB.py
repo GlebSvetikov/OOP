@@ -28,3 +28,18 @@ class ProductRepDB:
                     product_code=result['product_code']
                 )
             return None
+
+    def get_k_n_short_list(self, k, n):
+            offset = (n - 1) * k  # Вычисление смещения для пагинации
+            with self.connection.cursor() as cursor:
+                sql = "SELECT product_id, name, price, product_code FROM products LIMIT %s OFFSET %s"
+                cursor.execute(sql, (k, offset))
+                results = cursor.fetchall()
+                return [
+                    Product(
+                        product_id=row['product_id'],
+                        name=row['name'],
+                        price=Decimal(row['price']),
+                        product_code=row['product_code']
+                    ) for row in results
+                ]
