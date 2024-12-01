@@ -29,4 +29,7 @@ class ProductRepJson:
     def get_k_n_short_list(self, k: int, n: int) -> List[Product]:
         start_index = k * n
         end_index = start_index + n
-        return self.products[start_index:end_index
+        return self.products[start_index:end_index]
+
+    def sort_by_field(self, field_name: str):
+        self.products.sort(key=lambda x: getattr(x, field_name))
