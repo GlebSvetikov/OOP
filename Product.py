@@ -89,6 +89,30 @@ class Product(BriefProduct):
             'product_code': self.product_code
         }, ensure_ascii=False)
 
+    @classmethod
+    def create_from_yaml(cls, yaml_string: str):
+        data = yaml.safe_load(yaml_string)
+        return cls(
+            product_id=data.get('product_id'),
+            name=data['name'],
+            description=data['description'],
+            price=Decimal(data['price']),
+            stock_quantity=data['stock_quantity'],
+            material=data['material'],
+            product_code=data['product_code']
+        )
+
+    def to_yaml(self) -> str:
+        return yaml.dump({
+            'product_id': self.product_id,
+            'name': self.name,
+            'description': self.description,
+            'price': str(self.price),
+            'stock_quantity': self.stock_quantity,
+            'material': self.material,
+            'product_code': self.product_code
+        }, allow_unicode=True, default_flow_style=False)
+
     def __str__(self):
         return (f"Product(product_id={self.product_id}, name='{self.name}', description='{self.description}', "
                 f"price={self.price}, stockQuantity={self.stock_quantity}, material='{self.material}', productCode='{self.product_code}')")
@@ -112,6 +136,17 @@ if __name__ == "__main__":
             material="Silver",
             product_code="123456"
         )
+
+        yaml_data = """
+                 name: Saphire ring
+                 description: mamamys
+                 price: "1000000.00"
+                 stock_quantity: 3
+                 material: Saphire
+                 product_code: 567893
+                  """
+        product0 = Product.create_from_yaml(yaml_data)
+        print(product0)
         product1.price = Decimal("100000.00")
         print(product1 == product2)
         print(product1.brief())
