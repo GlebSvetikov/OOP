@@ -15,3 +15,7 @@ class ProductRepJson:
                 return [Product.create_from_json(json.dumps(product)) for product in data]
         except FileNotFoundError:
             return []
+            
+    def _write_all(self):
+        with open(self.filename, 'w', encoding='cp1251') as file:
+            json.dump([json.loads(product.to_json()) for product in self.products], file, ensure_ascii=False, indent=4)
