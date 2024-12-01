@@ -19,3 +19,14 @@ class ProductRepJson:
     def _write_all(self):
         with open(self.filename, 'w', encoding='cp1251') as file:
             json.dump([json.loads(product.to_json()) for product in self.products], file, ensure_ascii=False, indent=4)
+
+   def get_by_id(self, product_id: int) -> Optional[Product]:
+        for product in self.products:
+            if product.product_id == product_id:
+                return product
+        return None
+
+    def get_k_n_short_list(self, k: int, n: int) -> List[Product]:
+        start_index = k * n
+        end_index = start_index + n
+        return self.products[start_index:end_index
