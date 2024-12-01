@@ -33,3 +33,25 @@ class ProductRepJson:
 
     def sort_by_field(self, field_name: str):
         self.products.sort(key=lambda x: getattr(x, field_name))
+
+    def add_product(self, product: Product):
+        max_id = max((p.product_id for p in self.products if p.product_id is not None), default=0)
+        product.product_id = max_id + 1
+        self.products.append(product)
+        self._write_all()
+
+    def replace_product_by_id(self, product_id: int, new_product: Product):
+        for i, product in enumerate(self.products):
+            if product.product_id == product_id:
+                self.products[i] = new_product
+                new_product.product_id = product_id
+                self._write_all()
+                return
+        raise ValueError(f"Product with ID {product_id} not found.")
+
+    def delete_product_by_id(self, product_id: int):
+        self.products = [product for product in self.products if product.product_id != product_id]
+        self._write_all()
+
+    def get_count(self) -> int:
+        return len(self.products)
