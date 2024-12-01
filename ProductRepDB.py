@@ -58,6 +58,28 @@ class ProductRepDB:
                 product.material,
                 product.product_code
             ))
-            self.connection.commit()  # Подтверждаем изменения
-            product.product_id = cursor.lastrowid  # Получаем ID добавленного продукта
+            self.connection.commit()
+            product.product_id = cursor.lastrowid
             return product.product_id
+
+    def update_by_id(self, product_id, product):
+        with self.connection.cursor() as cursor:
+            sql = """
+                UPDATE products
+                SET name = %s, description = %s, price = %s, 
+                    stock_quantity = %s, material = %s, product_code = %s
+                WHERE product_id = %s
+            """
+            cursor.execute(sql, (
+                product.name,
+                product.description,
+                str(product.price),
+                product.stock_quantity,
+                product.material,
+                product.product_code,
+                product_id
+            ))
+            self.connection.commit()
+            return cursor.rowcount > 0
+
+
