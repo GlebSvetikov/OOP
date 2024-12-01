@@ -43,3 +43,21 @@ class ProductRepDB:
                         product_code=row['product_code']
                     ) for row in results
                 ]
+
+    def add(self, product):
+        with self.connection.cursor() as cursor:
+            sql = """
+                INSERT INTO products (name, description, price, stock_quantity, material, product_code)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            cursor.execute(sql, (
+                product.name,
+                product.description,
+                str(product.price),
+                product.stock_quantity,
+                product.material,
+                product.product_code
+            ))
+            self.connection.commit()  # Подтверждаем изменения
+            product.product_id = cursor.lastrowid  # Получаем ID добавленного продукта
+            return product.product_id
