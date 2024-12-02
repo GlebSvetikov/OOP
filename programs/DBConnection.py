@@ -1,31 +1,27 @@
 import pymysql
+from pymysql.cursors import DictCursor
 
 class DBConnection:
     _instance = None
 
-    def __new__(cls, host, user, password, database):
-        """Метод для создания единственного экземпляра."""
+    def __new__(cls, host, user, password, database, port=3306):
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance._init_connection(host, user, password, database)
+            cls._instance = super(DBConnection, cls).__new__(cls)
+            cls._instance.connection = pymysql.connect(
+                host=host,
+                user=user,
+                password=password,
+                database=database,
+                port=port,
+                cursorclass=DictCursor
+            )
         return cls._instance
 
-    def _init_connection(self, host, user, password, database):
-        """Инициализация соединения с базой данных."""
-        self.connection = pymysql.connect(
-            host=host,
-            user=user,
-            password=password,
-            database=database,
-            cursorclass=pymysql.cursors.DictCursor
-        )
-
     def get_connection(self):
-        """Метод для получения соединения с базой данных."""
         return self.connection
 
     def close(self):
-        """Закрытие соединения."""
-        if self.connection:
+        if self._instance:
             self.connection.close()
-            self._instance = None
+            DBConnection._instance = None
+
