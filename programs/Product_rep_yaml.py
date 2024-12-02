@@ -22,3 +22,9 @@ class ProductRepYaml(ProductRepository):
     def _write_all(self):
         with open(self.filename, 'w', encoding='utf-8') as file:
             yaml.dump([json.loads(product.to_json()) for product in self.products], file, allow_unicode=True, default_flow_style=False)
+
+yaml_repository = ProductRepYaml("products.yaml")
+print(f"Всего продуктов (YAML): {yaml_repository.get_count()}")
+print("Список продуктов (YAML):")
+for product in yaml_repository.products:
+    print(product)
