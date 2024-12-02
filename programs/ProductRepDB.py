@@ -1,14 +1,14 @@
 from decimal import Decimal
+from typing import List
 from Product import Product
+from DBConnection import DBConnection
 
 class ProductRepDB:
-    def __init__(self, host, user, password, database):
-        # Получаем единственный экземпляр DBConnection
-        self.db_connection = DBConnection(host, user, password, database).get_connection()
+    def __init__(self, host, user, password, database, port=3306):
+        self.db = DBConnection(host, user, password, database, port).get_connection()
 
-    def get_by_id(self, product_id):
-        """Получение продукта по ID"""
-        with self.db_connection.cursor() as cursor:
+    def get_by_id(self, product_id: int) -> Product:
+        with self.db.cursor() as cursor:
             sql = "SELECT * FROM products WHERE product_id = %s"
             cursor.execute(sql, (product_id,))
             result = cursor.fetchone()
@@ -24,10 +24,9 @@ class ProductRepDB:
                 )
             return None
 
-    def get_k_n_short_list(self, k, n):
-        """Получение списка k по счету n продуктов для пагинации"""
+    def get_k_n_short_list(self, k: int, n: int) -> List[Product]:
         offset = (n - 1) * k
-        with self.db_connection.cursor() as cursor:
+        with self.db.cursor() as cursor:
             sql = "SELECT product_id, name, price, product_code FROM products LIMIT %s OFFSET %s"
             cursor.execute(sql, (k, offset))
             results = cursor.fetchall()
@@ -40,9 +39,8 @@ class ProductRepDB:
                 ) for row in results
             ]
 
-    def add(self, product):
-        """Добавление нового продукта в базу данных"""
-        with self.db_connection.cursor() as cursor:
+    def add(self, product: Product) -> int:
+        with self.db.cursor() as cursor:
             sql = """
                 INSERT INTO products (name, description, price, stock_quantity, material, product_code)
                 VALUES (%s, %s, %s, %s, %s, %s)
@@ -55,13 +53,12 @@ class ProductRepDB:
                 product.material,
                 product.product_code
             ))
-            self.db_connection.commit()
+            self.db.commit()
             product.product_id = cursor.lastrowid
             return product.product_id
 
-    def update_by_id(self, product_id, product):
-        """Обновление данных продукта по ID"""
-        with self.db_connection.cursor() as cursor:
+    def update_by_id(self, product_id: int, product: Product) -> bool:
+        with self.db.cursor() as cursor:
             sql = """
                 UPDATE products
                 SET name = %s, description = %s, price = %s, 
@@ -77,21 +74,22 @@ class ProductRepDB:
                 product.product_code,
                 product_id
             ))
-            self.db_connection.commit()
+            self.db.commit()
             return cursor.rowcount > 0
 
-    def delete_by_id(self, product_id):
-        """Удаление продукта по ID"""
-        with self.db_connection.cursor() as cursor:
+    def delete_by_id(self, product_id: int) -> bool:
+        with self.db.cursor() as cursor:
             sql = "DELETE FROM products WHERE product_id = %s"
             cursor.execute(sql, (product_id,))
-            self.db_connection.commit()
+            self.db.commit()
             return cursor.rowcount > 0
 
-    def get_count(self):
-        """Получить количество продуктов в базе"""
-        with self.db_connection.cursor() as cursor:
+    def get_count(self) -> int:
+        with self.db.cursor() as cursor:
             sql = "SELECT COUNT(*) AS count FROM products"
             cursor.execute(sql)
             result = cursor.fetchone()
             return result['count'] if result else 0
+
+    def close(self):
+        self.db.close()
