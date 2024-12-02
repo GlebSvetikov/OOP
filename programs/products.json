@@ -1,0 +1,20 @@
+[
+    {
+        "product_id": 1,
+        "name": "Золотое кольцо",
+        "description": "Кольцо из золота 18К",
+        "price": "15000.00",
+        "stock_quantity": 5,
+        "material": "Золото",
+        "product_code": "RNG123"
+    },
+    {
+        "product_id": 2,
+        "name": "Серебряное кольцо",
+        "description": "Кольцо из серебра 925",
+        "price": "5000.00",
+        "stock_quantity": 10,
+        "material": "Серебро",
+        "product_code": "RNG124"
+    }
+]
