@@ -12,12 +12,20 @@ class ProductRepJson(ProductRepository):
 
     def _read_all(self) -> List[Product]:
         try:
-            with open(self.filename, 'r', encoding='cp1251') as file:
+            with open(self.filename, 'r', encoding='utf-8') as file:
                 data = json.load(file)
                 return [Product.create_from_json(json.dumps(product)) for product in data]
         except FileNotFoundError:
             return []
 
     def _write_all(self):
-        with open(self.filename, 'w', encoding='cp1251') as file:
+        with open(self.filename, 'w', encoding='utf-8') as file:
             json.dump([json.loads(product.to_json()) for product in self.products], file, ensure_ascii=False, indent=4)
+
+    def print_all(self):
+        print(json.dumps([json.loads(product.to_json()) for product in self.products], ensure_ascii=False, indent=4))
+
+json_repository = ProductRepJson("products.json")
+print("Список продуктов (JSON):")
+for product in json_repository.products:
+    print(product)
