@@ -1,0 +1,13 @@
+- description: Кольцо из золота высокого качества
+  material: Золото
+  name: Золотое кольцо
+  price: '15000.00'
+  product_code: '654321'
+  stock_quantity: 10
+- description: Кольцо из золота высокого качества
+  material: Золото
+  name: Золотое кольцо
+  price: '15000.00'
+  product_code: '654321'
+  product_id: 2
+  stock_quantity: 10
