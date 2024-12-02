@@ -6,6 +6,7 @@ from itertools import product
 from typing import Optional
 from BriefProduct import BriefProduct
 
+
 class Product(BriefProduct):
     def __init__(self, product_id: Optional[int] = None, name: str = "", description: str = "", price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "", product_code: str = ""):
         super().__init__(product_id, name, price, product_code)
@@ -136,17 +137,6 @@ if __name__ == "__main__":
             material="Silver",
             product_code="123456"
         )
-
-        yaml_data = """
-                 name: Saphire ring
-                 description: mamamys
-                 price: "1000000.00"
-                 stock_quantity: 3
-                 material: Saphire
-                 product_code: 567893
-                  """
-        product0 = Product.create_from_yaml(yaml_data)
-        print(product0)
         product1.price = Decimal("100000.00")
         print(product1 == product2)
         print(product1.brief())
