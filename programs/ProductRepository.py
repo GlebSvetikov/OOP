@@ -1,51 +1,52 @@
-from abc import ABC, abstractmethod
 from typing import List, Optional
 from Product import Product
 
-class ProductRepository(ABC):
-    def __init__(self):
+
+class ProductRepository:
+    def __init__(self, strategy):
         self.products = []
+        self.strategy = strategy  # Стратегия для чтения и записи данных
 
-    @abstractmethod
-    def _read_all(self) -> List[Product]:
-        pass
+    def read_all(self) -> List[Product]:
+        """Чтение всех продуктов с использованием стратегии."""
+        data = self.strategy.read()
+        return [Product.create_from_dict(item) for item in data]
 
-    @abstractmethod
-    def _write_all(self):
-        pass
+    def write_all(self, products: List[Product]) -> None:
+        """Запись всех продуктов с использованием стратегии."""
+        data = [product.to_dict() for product in products]
+        self.strategy.write(data)
 
     def get_by_id(self, product_id: int) -> Optional[Product]:
+        """Получение продукта по ID."""
         for product in self.products:
             if product.product_id == product_id:
                 return product
         return None
 
-    def get_k_n_short_list(self, k: int, n: int) -> List[Product]:
-        start_index = (k - 1) * n
-        end_index = start_index + n
-        return self.products[start_index:end_index]
-
-    def sort_by_field(self, field_name: str):
-        self.products.sort(key=lambda x: getattr(x, field_name))
-
-    def add_product(self, product: Product):
-        max_id = max((p.product_id for p in self.products if p.product_id is not None), default=0)
-        product.product_id = max_id + 1
-        self.products.append(product)
-        self._write_all()
+    def add_product(self, product: Product) -> None:
+        products = self.read_all()
+        if any(p.product_code == product.product_code for p in products):
+            raise ValueError(f"Продукт с кодом {product.product_code} уже существует.")
+        products = self.read_all()
+        products.append(product)
+        self.write_all(products)
 
     def replace_product_by_id(self, product_id: int, new_product: Product):
+        """Заменить продукт по ID."""
         for i, product in enumerate(self.products):
             if product.product_id == product_id:
                 self.products[i] = new_product
                 new_product.product_id = product_id
-                self._write_all()
+                self.write_all(self.products)
                 return
         raise ValueError(f"Продукт с ID {product_id} не найден.")
 
     def delete_product_by_id(self, product_id: int):
+        """Удалить продукт по ID."""
         self.products = [product for product in self.products if product.product_id != product_id]
-        self._write_all()
+        self.write_all(self.products)
 
     def get_count(self) -> int:
+        """Получить количество продуктов в репозитории."""
         return len(self.products)
