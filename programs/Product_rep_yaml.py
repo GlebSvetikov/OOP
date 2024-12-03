@@ -1,30 +1,59 @@
+import os
 import yaml
-import json
 from decimal import Decimal
-from typing import List
-from Product import Product
 from ProductRepository import ProductRepository
+from ProductRepositoryStrategy import ProductRepFileStrategy
+from Product import Product  # Импортируем класс Product
 
-class ProductRepYaml(ProductRepository):
-    def __init__(self, filename: str):
-        super().__init__()
-        self.filename = filename
-        self.products = self._read_all()
+class YamlProductRepFileStrategy(ProductRepFileStrategy):
+    def __init__(self, file_path: str):
+        self.file_path = file_path
 
-    def _read_all(self) -> List[Product]:
-        try:
-            with open(self.filename, 'r', encoding='utf-8') as file:
-                data = yaml.safe_load(file)
-                return [Product.create_from_json(json.dumps(product)) for product in data]
-        except FileNotFoundError:
+    def read(self):
+        """Чтение данных из YAML файла."""
+        if not os.path.exists(self.file_path):
             return []
+        with open(self.file_path, 'r', encoding='utf-8') as file:
+            return yaml.safe_load(file) or []
 
-    def _write_all(self):
-        with open(self.filename, 'w', encoding='utf-8') as file:
-            yaml.dump([json.loads(product.to_json()) for product in self.products], file, allow_unicode=True, default_flow_style=False)
+    def write(self, data):
+        """Запись данных в YAML файл."""
+        with open(self.file_path, 'w', encoding='utf-8') as file:
+            yaml.dump(data, file, allow_unicode=True, default_flow_style=False)
 
-yaml_repository = ProductRepYaml("products.yaml")
-print(f"Всего продуктов (YAML): {yaml_repository.get_count()}")
-print("Список продуктов (YAML):")
-for product in yaml_repository.products:
-    print(product)
+    def display(self):
+        """Вывод всех данных из файла."""
+        data = self.read()
+        for item in data:
+            print(item)
+
+# Инициализация стратегии YAML
+strategy = YamlProductRepFileStrategy('products.yaml')
+
+# Чтение данных из файла и отображение их
+print("Current products in YAML file:")
+strategy.display()
+
+# Создание репозитория с использованием стратегии YAML
+yaml_repository = ProductRepository(strategy)
+
+# Создание нового продукта
+new_product = Product.create_new_product(
+    name="Продукт 1",
+    description="Описание продукта",
+    price=Decimal('19.99'),
+    stock_quantity=100,
+    material="Пластик",
+    product_code="P1234789000"
+)
+
+# Попытка добавить новый продукт
+try:
+    yaml_repository.add_product(new_product)
+    print("Продукт добавлен.")
+except ValueError as e:
+    print(e)
+
+# Отображение обновленного списка продуктов
+print("\nUpdated products in YAML file:")
+strategy.display()
