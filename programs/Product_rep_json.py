@@ -1,31 +1,53 @@
 import json
+import os
 from decimal import Decimal
-from typing import List
-from Product import Product
 from ProductRepository import ProductRepository
+from ProductRepositoryStrategy import ProductRepFileStrategy
+from Product import Product
 
-class ProductRepJson(ProductRepository):
-    def __init__(self, filename: str):
-        super().__init__()
-        self.filename = filename
-        self.products = self._read_all()
+class JsonProductRepFileStrategy(ProductRepFileStrategy):
+    def __init__(self, file_path: str):
+        self.file_path = file_path
 
-    def _read_all(self) -> List[Product]:
-        try:
-            with open(self.filename, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-                return [Product.create_from_json(json.dumps(product)) for product in data]
-        except FileNotFoundError:
+    def read(self):
+        if not os.path.exists(self.file_path):
             return []
+        with open(self.file_path, 'r', encoding='utf-8') as file:
+            return json.load(file)
 
-    def _write_all(self):
-        with open(self.filename, 'w', encoding='utf-8') as file:
-            json.dump([json.loads(product.to_json()) for product in self.products], file, ensure_ascii=False, indent=4)
+    def write(self, data):
+        with open(self.file_path, 'w', encoding='utf-8') as file:
+            json.dump(data, file, ensure_ascii=False, indent=4)
 
-    def print_all(self):
-        print(json.dumps([json.loads(product.to_json()) for product in self.products], ensure_ascii=False, indent=4))
+    def display(self):
+        data = self.read()
+        for item in data:
+            print(item)
 
-json_repository = ProductRepJson("products.json")
-print("Список продуктов (JSON):")
-for product in json_repository.products:
-    print(product)
+strategy = JsonProductRepFileStrategy('products.json')
+
+print("Current products in JSON file:")
+strategy.display()
+
+# Создание репозитория с использованием стратегии JSON
+json_repository = ProductRepository(strategy)
+
+# Создание нового продукта
+new_product = Product.create_new_product(
+    name="Продукт 1",
+    description="Описание продукта",
+    price=Decimal('19.99'),
+    stock_quantity=100,
+    material="Пластик",
+    product_code="P123478900"
+)
+
+try:
+    json_repository.add_product(new_product)
+    print("Продукт добавлен.")
+except ValueError as e:
+    print(e)
+
+# Отображение обновленного списка продуктов
+print("\nUpdated products in JSON file:")
+strategy.display()
