@@ -49,6 +49,29 @@ class Product(BriefProduct):
         return cls(product_id=product_id, name=name, description=description, price=price, stock_quantity=stock_quantity, material=material, product_code=product_code)
 
     @classmethod
+    def create_from_dict(cls, data: dict):
+        return cls(
+            product_id=data.get('product_id'),
+            name=data['name'],
+            description=data['description'],
+            price=Decimal(data['price']),
+            stock_quantity=data['stock_quantity'],
+            material=data['material'],
+            product_code=data.get('product_code')
+        )
+
+    def to_dict(self) -> dict:
+        return {
+            "product_id": self.product_id,
+            "name": self.name,
+            "description": self.description,
+            "price": str(self.price),  # Преобразуем Decimal в строку для корректного формата
+            "stock_quantity": self.stock_quantity,
+            "material": self.material,
+            "product_code": self.product_code
+    }
+
+    @classmethod
     def create_from_string(cls, product_string: str):
         parts = product_string.split(",")
         if len(parts) != 7:
