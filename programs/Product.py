@@ -1,14 +1,28 @@
-# --*-- encoding: cp1251 --*--
+# -*- coding: cp1251 -*-
 import json
 import yaml
 from decimal import Decimal
-from itertools import product
-from typing import Optional
-from BriefProduct import BriefProduct
+from typing import Optional, List
+
+
+class BriefProduct:
+    def __init__(self, product_id: Optional[int], name: str, price: Decimal, product_code: str):
+        self.product_id = product_id
+        self.name = name
+        self.price = price
+        self.product_code = product_code
+
+    def __eq__(self, other: 'BriefProduct') -> bool:
+        return self.product_code == other.product_code
+
+    def brief(self) -> str:
+        return f"{self.name} ({self.product_code}) - {self.price}"
 
 
 class Product(BriefProduct):
-    def __init__(self, product_id: Optional[int] = None, name: str = "", description: str = "", price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "", product_code: str = ""):
+    def __init__(self, product_id: Optional[int] = None, name: str = "", description: str = "",
+                 price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "",
+                 product_code: str = ""):
         super().__init__(product_id, name, price, product_code)
         self._description = description
         self._stock_quantity = stock_quantity
@@ -45,11 +59,20 @@ class Product(BriefProduct):
         self._material = value
 
     @classmethod
-    def create_new_product(cls, product_id: Optional[int] = None, name: str = "", description: str = "", price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "", product_code: str = ""):
-        return cls(product_id=product_id, name=name, description=description, price=price, stock_quantity=stock_quantity, material=material, product_code=product_code)
+    def is_product_code_unique(cls, product_code: str, products: List['Product']) -> bool:
+        return all(product.product_code != product_code for product in products)
 
     @classmethod
-    def create_from_dict(cls, data: dict):
+    def create_new_product(cls, product_id: Optional[int] = None, name: str = "", description: str = "",
+                           price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "",
+                           product_code: str = "", products: List['Product'] = []) -> 'Product':
+        if cls.is_product_code_unique(product_code, products):
+            return cls(product_id, name, description, price, stock_quantity, material, product_code)
+        else:
+            raise ValueError(f"Product with code {product_code} already exists.")
+
+    @classmethod
+    def create_from_dict(cls, data: dict) -> 'Product':
         return cls(
             product_id=data.get('product_id'),
             name=data['name'],
@@ -69,10 +92,10 @@ class Product(BriefProduct):
             "stock_quantity": self.stock_quantity,
             "material": self.material,
             "product_code": self.product_code
-    }
+        }
 
     @classmethod
-    def create_from_string(cls, product_string: str):
+    def create_from_string(cls, product_string: str) -> 'Product':
         parts = product_string.split(",")
         if len(parts) != 7:
             raise ValueError("Invalid product string format. Expected 7 comma-separated values.")
@@ -90,7 +113,7 @@ class Product(BriefProduct):
             raise ValueError("Invalid number format in product string.") from e
 
     @classmethod
-    def create_from_json(cls, json_string: str):
+    def create_from_json(cls, json_string: str) -> 'Product':
         data = json.loads(json_string)
         return cls(
             product_id=data.get('product_id'),
@@ -114,7 +137,7 @@ class Product(BriefProduct):
         }, ensure_ascii=False)
 
     @classmethod
-    def create_from_yaml(cls, yaml_string: str):
+    def create_from_yaml(cls, yaml_string: str) -> 'Product':
         data = yaml.safe_load(yaml_string)
         return cls(
             product_id=data.get('product_id'),
@@ -137,20 +160,25 @@ class Product(BriefProduct):
             'product_code': self.product_code
         }, allow_unicode=True, default_flow_style=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (f"Product(product_id={self.product_id}, name='{self.name}', description='{self.description}', "
                 f"price={self.price}, stockQuantity={self.stock_quantity}, material='{self.material}', productCode='{self.product_code}')")
 
+
 if __name__ == "__main__":
     try:
+        products = []
         product1 = Product.create_new_product(
             name="Gold ring",
             description="abc",
             price=Decimal("15000.00"),
             stock_quantity=1,
             material="Gold",
-            product_code="123456"
+            product_code="123456",
+            products=products
         )
+        products.append(product1)
+
         product2 = Product.create_new_product(
             product_id=2,
             name="Silver ring",
@@ -158,8 +186,11 @@ if __name__ == "__main__":
             price=Decimal("10000.00"),
             stock_quantity=2,
             material="Silver",
-            product_code="123456"
+            product_code="123456",
+            products=products
         )
+        products.append(product2)
+
         product1.price = Decimal("100000.00")
         print(product1 == product2)
         print(product1.brief())
