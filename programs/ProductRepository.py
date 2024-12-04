@@ -42,3 +42,9 @@ class ProductRepository:
         products = self.read_all()
         products = [product for product in products if product.product_id != product_id]
         self.write_all(products)
+
+    def get_k_n_short_list(self, k: int, n: int) -> List[Product]:
+        products = self.read_all()
+        start_index = (k - 1) * n
+        end_index = start_index + n
+        return products[start_index:end_index]
