@@ -61,8 +61,8 @@ erDiagram
 **Таблица PRODUCT - Товар**
 
 ## Диаграмма классов
-![Диаграмма без названия  MConverter eu](![Untitled diagram-2024-12-04-100839](https://github.com/user-attachments/assets/70f39420-be85-4ae5-a4a9-5e394a966cc2)
-)
+![Диаграмма без названия  MConverter eu](https://github.com/user-attachments/assets/70f39420-be85-4ae5-a4a9-5e394a966cc2)
+
 
 
 
