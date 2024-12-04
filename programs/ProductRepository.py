@@ -52,3 +52,10 @@ class ProductRepository:
     def get_count(self) -> int:
         products = self.read_all()
         return len(products)
+
+    def sort_products(self, field: str, reverse: bool = False) -> List[Product]:
+        if field not in ['product_id', 'name', 'price', 'stock_quantity', 'material', 'product_code']:
+            raise ValueError(f"Invalid field '{field}' for sorting.")
+
+        products = self.read_all()
+        return sorted(products, key=lambda product: getattr(product, field), reverse=reverse)
