@@ -40,6 +40,10 @@ class ProductRepDB:
             ]
 
     def add(self, product: Product) -> int:
+
+        if self.is_product_code_unique(product.product_code):
+            raise ValueError(f"Product with code {product.product_code} already exists.")
+
         with self.db.cursor() as cursor:
             sql = """
                 INSERT INTO products (name, description, price, stock_quantity, material, product_code)
@@ -56,6 +60,13 @@ class ProductRepDB:
             self.db.commit()
             product.product_id = cursor.lastrowid
             return product.product_id
+
+    def is_product_code_unique(self, product_code: str) -> bool:
+        sql = "SELECT COUNT(*) FROM products WHERE product_code = %s"
+        with self.db.cursor() as cursor:
+            cursor.execute(sql, (product_code,))
+            result = cursor.fetchone()
+            return result['COUNT(*)'] > 0
 
     def update_by_id(self, product_id: int, product: Product) -> bool:
         with self.db.cursor() as cursor:
