@@ -48,3 +48,7 @@ class ProductRepository:
         start_index = (k - 1) * n
         end_index = start_index + n
         return products[start_index:end_index]
+
+    def get_count(self) -> int:
+        products = self.read_all()
+        return len(products)
