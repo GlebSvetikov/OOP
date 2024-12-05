@@ -1,7 +1,10 @@
 import json
 import os
+from Product import Product
+from decimal import Decimal
 from ProductRepository import ProductRepository
 from ProductRepositoryStrategy import ProductRepFileStrategy
+from DBAdapter import  ProductRepositoryAdapter
 
 class JsonProductRepFileStrategy(ProductRepFileStrategy):
     def __init__(self, file_path: str):
@@ -30,21 +33,22 @@ class JsonProductRepFileStrategy(ProductRepFileStrategy):
 # Определяем путь к файлу JSON
 strategy = JsonProductRepFileStrategy('products.json')
 
-print("Current products in JSON file:")
-strategy.display()
 
 # Создание репозитория с использованием стратегии JSON
 json_repository = ProductRepository(strategy)
 
-print(json_repository.get_by_id(4))
-print("\n12312312:")
-print(json_repository.get_count())
-for product in json_repository.sort_products("price", reverse=False):
-    print(product)
+adapter = ProductRepositoryAdapter(json_repository)
 
-print("\nFirst 5 products:")
-for product in json_repository.get_k_n_short_list(2, 5):
-    print(product)
+new_product = Product.create_new_product(
+    name="Продукт 1123q2w4123121231231",
+    description="Описание продукта",
+    price=Decimal('19.99'),
+    stock_quantity=100,
+    material="Пластик",
+    product_code="5876543412312"
+)
+
+adapter.add(new_product)
 
 
 # Отображение обновленного списка продуктов
