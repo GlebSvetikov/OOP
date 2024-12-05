@@ -3,7 +3,7 @@ from pymysql.cursors import DictCursor
 import threading
 from Product import Product
 from decimal import Decimal
-from DBAdapter import  ProductRepositoryAdapter
+from Adapter import  ProductRepositoryAdapter
 
 
 class DBConnection:
@@ -37,18 +37,18 @@ class DBConnection:
                 DBConnection._instance = None
 
     def _create_table_if_not_exists(self):
-        # SQL-запрос для создания таблицы `products`, если она не существует
         create_table_query = """
-        CREATE TABLE IF NOT EXISTS `products` (
-            `product_id` INT NOT NULL AUTO_INCREMENT,
-            `name` VARCHAR(255) NOT NULL,
-            `description` TEXT,
-            `price` DECIMAL(10,2) NOT NULL,
-            `stock_quantity` INT NOT NULL,
-            `material` VARCHAR(255) DEFAULT NULL,
-            `product_code` VARCHAR(6) NOT NULL,  -- Ограничиваем длину product_code до 6 символов
-            PRIMARY KEY (`product_id`),
-            CHECK (CHAR_LENGTH(`product_code`) = 6)  -- Ограничение на длину ровно 6 символов
+        CREATE TABLE IF NOT EXISTS products (
+            product_id INT NOT NULL AUTO_INCREMENT,
+            name VARCHAR(255) NOT NULL,
+            description TEXT,
+            price DECIMAL(10,2) NOT NULL,
+            stock_quantity INT NOT NULL,
+            material VARCHAR(255) DEFAULT NULL,
+            product_code VARCHAR(6) NOT NULL,
+            UNIQUE (`product_code`),-- Ограничиваем длину product_code до 6 символов
+            PRIMARY KEY (product_id),
+            CHECK (CHAR_LENGTH(product_code) = 6)  -- Ограничение на длину ровно 6 символов
         )
         """
         try:
