@@ -104,3 +104,15 @@ class ProductRepDB:
 
     def close(self):
         self.db.close()
+
+new_product = Product.create_new_product(
+    name="Продукт 1123q2w4123121231231",
+    description="Описание продукта",
+    price=Decimal('19.99'),
+    stock_quantity=100,
+    material="Пластик",
+    product_code="123456"
+)
+db = DBConnection(host='localhost', user='root', password='11062003', database='products', port=3306)
+product_repo = ProductRepDB(host="localhost", user="root", password="11062003", database="products", port=3306)
+product_repo.add(new_product)
