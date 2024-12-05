@@ -1,60 +1,86 @@
 from typing import List, Optional
 from Product import Product
+from ProductRepositoryStrategy import ProductRepFileStrategy
 
 
 class ProductRepository:
-    def __init__(self, strategy):
-        self.strategy = strategy
+    def __init__(self, strategy: ProductRepFileStrategy):
+        self._data = []
+        self._strategy = strategy
+        self.read_data()
 
-    def read_all(self) -> List[Product]:
-        data = self.strategy.read()
-        return [Product.create_from_dict(item) for item in data]
+    def write_data(self):
+        self._strategy.write(self._data)
 
-    def write_all(self, products: List[Product]) -> None:
-        data = [product.to_dict() for product in products]
-        self.strategy.write(data)
+    def read_data(self):
+        self._data = self._strategy.read()
 
-    def add_product(self, product: Product) -> None:
-        products = self.read_all()
-        if not Product.is_product_code_unique(product.product_code, products):
+    def add_product(self, product: Product):
+        product_dict = product.to_dict()
+        products = [Product.create_from_dict(prod) for prod in self._data]
+        if not Product.check_unique_code(product.product_code, products):
             raise ValueError(f"Product with code {product.product_code} already exists.")
-        self.strategy.add(product)
+
+        self._data.append(product_dict)
 
     def get_by_id(self, product_id: int) -> Optional[Product]:
-        products = self.read_all()
-        for product in products:
-            if product.product_id == product_id:
-                return product
+        """Получить продукт по ID"""
+        for product in self._data:
+            if product['product_id'] == product_id:
+                return Product.create_from_dict(product)
         return None
 
-    def replace_product_by_id(self, product_id: int, new_product: Product):
-        products = self.read_all()
-        for i, product in enumerate(products):
-            if product.product_id == product_id:
-                products[i] = new_product
-                new_product.product_id = product_id
-                self.write_all(products)
-                return
-        raise ValueError(f"Продукт с ID {product_id} не найден.")
-
-    def delete_product_by_id(self, product_id: int):
-        products = self.read_all()
-        products = [product for product in products if product.product_id != product_id]
-        self.write_all(products)
-
     def get_k_n_short_list(self, k: int, n: int) -> List[Product]:
-        products = self.read_all()
-        start_index = (k - 1) * n
-        end_index = start_index + n
-        return products[start_index:end_index]
+        """Получить список k по счету n продуктов"""
+        start_index = (n - 1) * k
+        end_index = start_index + k
+        return [Product.create_from_dict(product) for product in self._data[start_index:end_index]]
 
-    def get_count(self) -> int:
-        products = self.read_all()
-        return len(products)
+    def sort_by_field(self, field: str, reverse: bool = False) -> List[Product]:
 
-    def sort_products(self, field: str, reverse: bool = False) -> List[Product]:
         if field not in ['product_id', 'name', 'price', 'stock_quantity', 'material', 'product_code']:
             raise ValueError(f"Invalid field '{field}' for sorting.")
 
-        products = self.read_all()
-        return sorted(products, key=lambda product: getattr(product, field), reverse=reverse)
+        self._data.sort(key=lambda x: x.get(field), reverse=reverse)
+
+        return [Product.create_from_dict(product) for product in self._data]
+
+    def product_replace_by_id(self, product_id: int, name=None, description=None, price=None, stock_quantity=None, material=None, product_code=None):
+        product = self.get_by_id(product_id)
+        if not product:
+            raise ValueError(f"Product with ID {product_id} not found.")
+
+        products = [Product.create_from_dict(prod) for prod in
+                    self._data]
+        if not Product.check_unique_code(product_code, products):
+            raise ValueError(f"Product with code {product.product_code} already exists.")
+
+        if name:
+            product.name = name
+        if description:
+            product.description = description
+        if price:
+            product.price = price
+        if stock_quantity:
+            product.stock_quantity = stock_quantity
+        if material:
+            product.material = material
+        if product_code:
+            product.product_code = product_code
+
+        for i, p in enumerate(self._data):
+            if p['product_id'] == product_id:
+                self._data[i] = product.to_dict()
+                break
+
+    def product_delete_by_id(self, product_id: int):
+        product = self.get_by_id(product_id)
+        if not product:
+            raise ValueError(f"Product with ID {product_id} not found.")
+
+        self._data = [p for p in self._data if p['product_id'] != product_id]
+
+    def get_count(self) -> int:
+        """Получить количество продуктов"""
+        return len(self._data)
+

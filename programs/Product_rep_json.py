@@ -20,11 +20,6 @@ class JsonProductRepFileStrategy(ProductRepFileStrategy):
         with open(self.file_path, 'w', encoding='utf-8') as file:
             json.dump(data, file, ensure_ascii=False, indent=4)
 
-    def add(self, product):
-        data = self.read()
-        data.append(product.to_dict())
-        self.write(data)
-
     def display(self):
         data = self.read()
         for item in data:
@@ -37,18 +32,21 @@ strategy = JsonProductRepFileStrategy('products.json')
 # Создание репозитория с использованием стратегии JSON
 json_repository = ProductRepository(strategy)
 
-adapter = ProductRepositoryAdapter(json_repository)
 
 new_product = Product.create_new_product(
-    name="Продукт 1123q2w4123121231231",
+    product_id= 3,
+    name="Продук",
     description="Описание продукта",
     price=Decimal('19.99'),
     stock_quantity=100,
     material="Пластик",
-    product_code="5876543412312"
+    product_code="5890"
 )
+adapter = ProductRepositoryAdapter(json_repository)
 
-adapter.add(new_product)
+adapter.update_by_id(1,"govno","mamy",Decimal("15000.00"),2000,"mazut","579762")
+for product in json_repository.sort_by_field("stock_quantity",reverse=True):
+    print (product)
 
 
 # Отображение обновленного списка продуктов

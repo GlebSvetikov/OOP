@@ -9,9 +9,6 @@ class ProductRepFileStrategy(ABC):
     def write(self, data):
         pass
 
-    @abstractmethod
-    def add(self, product):
-        pass
 
     @abstractmethod
     def display(self):
