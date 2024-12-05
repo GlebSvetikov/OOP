@@ -19,7 +19,7 @@ class ProductRepository:
         product_dict = product.to_dict()
         products = [Product.create_from_dict(prod) for prod in self._data]
         if not Product.check_unique_code(product.product_code, products):
-            raise ValueError(f"Product with code {product.product_code} already exists.")
+            raise ValueError(f"Product already exists.")
 
         self._data.append(product_dict)
 
@@ -53,7 +53,7 @@ class ProductRepository:
         products = [Product.create_from_dict(prod) for prod in
                     self._data]
         if not Product.check_unique_code(product_code, products):
-            raise ValueError(f"Product with code {product.product_code} already exists.")
+            raise ValueError(f"Product already exists.")
 
         if name:
             product.name = name

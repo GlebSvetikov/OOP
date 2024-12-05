@@ -3,21 +3,7 @@ import json
 import yaml
 from decimal import Decimal
 from typing import Optional, List
-
-
-class BriefProduct:
-    def __init__(self, product_id: Optional[int], name: str, price: Decimal, product_code: str):
-        self.product_id = product_id
-        self.name = name
-        self.price = price
-        self.product_code = product_code
-
-    def __eq__(self, other: 'BriefProduct') -> bool:
-        return self.product_code == other.product_code
-
-    def brief(self) -> str:
-        return f"{self.name} ({self.product_code}) - {self.price}"
-
+from BriefProduct import BriefProduct
 
 class Product(BriefProduct):
     def __init__(self, product_id: Optional[int] = None, name: str = "", description: str = "",
@@ -59,17 +45,20 @@ class Product(BriefProduct):
         self._material = value
 
     @classmethod
-    def is_product_code_unique(cls, product_code: str, products: List['Product']) -> bool:
-        return all(product.product_code != product_code for product in products)
+    def check_unique_code(cls, product_code: str, products: List['Product']) -> bool:
+        """ѕроверка уникальности product_code среди всех продуктов"""
+        for product in products:
+            if product.product_code == product_code:
+                return False
+        return True
 
     @classmethod
     def create_new_product(cls, product_id: Optional[int] = None, name: str = "", description: str = "",
                            price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "",
                            product_code: str = "", products: List['Product'] = []) -> 'Product':
-        if cls.is_product_code_unique(product_code, products):
-            return cls(product_id, name, description, price, stock_quantity, material, product_code)
-        else:
-            raise ValueError(f"Product with code {product_code} already exists.")
+        if not cls.check_unique_code(product_code, products):
+            raise ValueError(f"Product already exists.")
+        return cls(product_id, name, description, price, stock_quantity, material, product_code)
 
     @classmethod
     def create_from_dict(cls, data: dict) -> 'Product':
