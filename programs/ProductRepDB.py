@@ -1,6 +1,8 @@
 from decimal import Decimal
+from itertools import product
 from typing import List
 from Product import Product
+from pymysql import MySQLError
 from DBConnection import DBConnection
 
 class ProductRepDB:
@@ -39,34 +41,23 @@ class ProductRepDB:
                 ) for row in results
             ]
 
-    def add(self, product: Product) -> int:
-
-        if self.is_product_code_unique(product.product_code):
-            raise ValueError(f"Product with code {product.product_code} already exists.")
-
-        with self.db.cursor() as cursor:
-            sql = """
+    def add(self, product: Product):
+        try:
+            query = """
                 INSERT INTO products (name, description, price, stock_quantity, material, product_code)
                 VALUES (%s, %s, %s, %s, %s, %s)
             """
-            cursor.execute(sql, (
-                product.name,
-                product.description,
-                str(product.price),
-                product.stock_quantity,
-                product.material,
-                product.product_code
-            ))
-            self.db.commit()
-            product.product_id = cursor.lastrowid
-            return product.product_id
+            values = (product.name, product.description, product.price, product.stock_quantity,
+                      product.material, product.product_code)
 
-    def is_product_code_unique(self, product_code: str) -> bool:
-        sql = "SELECT COUNT(*) FROM products WHERE product_code = %s"
-        with self.db.cursor() as cursor:
-            cursor.execute(sql, (product_code,))
-            result = cursor.fetchone()
-            return result['COUNT(*)'] > 0
+            with self.db.cursor() as cursor:
+                cursor.execute(query, values)
+                self.db.commit()
+        except MySQLError as e:
+            if e.args[0] == 1062:
+                raise ValueError(f"Product with code {product.product_code} already exists.")
+            else:
+                raise Exception("An unexpected error occurred while adding the product.")
 
     def update_by_id(self, product_id: int, product: Product) -> bool:
         with self.db.cursor() as cursor:
@@ -115,4 +106,4 @@ new_product = Product.create_new_product(
 )
 db = DBConnection(host='localhost', user='root', password='11062003', database='products', port=3306)
 product_repo = ProductRepDB(host="localhost", user="root", password="11062003", database="products", port=3306)
-product_repo.add(new_product)
+product_repo.delete_by_id(1)
