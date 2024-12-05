@@ -1,17 +1,13 @@
 import pymysql
 from pymysql.cursors import DictCursor
 import threading
-from Product import Product
-from decimal import Decimal
-from Adapter import  ProductRepositoryAdapter
 
 
 class DBConnection:
     _instance = None
-    _lock = threading.Lock()  # Блокировка для обеспечения потокобезопасности
+    _lock = threading.Lock()
 
     def __new__(cls, host, user, password, database, port=3306):
-        # Используем блокировку, чтобы гарантировать создание только одного экземпляра
         with cls._lock:
             if cls._instance is None:
                 cls._instance = super(DBConnection, cls).__new__(cls)
@@ -23,14 +19,13 @@ class DBConnection:
                     port=port,
                     cursorclass=DictCursor
                 )
-                cls._instance._create_table_if_not_exists()  # Создаем таблицу при подключении
+                cls._instance._create_table_if_not_exists()
         return cls._instance
 
     def get_connection(self):
         return self.connection
 
     def close(self):
-        # Закрываем соединение и сбрасываем экземпляр
         with self._lock:
             if self._instance:
                 self.connection.close()
@@ -46,16 +41,16 @@ class DBConnection:
             stock_quantity INT NOT NULL,
             material VARCHAR(255) DEFAULT NULL,
             product_code VARCHAR(6) NOT NULL,
-            UNIQUE (`product_code`),-- Ограничиваем длину product_code до 6 символов
+            UNIQUE (`product_code`),
             PRIMARY KEY (product_id),
-            CHECK (CHAR_LENGTH(product_code) = 6)  -- Ограничение на длину ровно 6 символов
+            CHECK (CHAR_LENGTH(product_code) = 6)  
         )
         """
         try:
             with self.connection.cursor() as cursor:
                 cursor.execute(create_table_query)
-                self.connection.commit()  # Применяем изменения
+                self.connection.commit()
         except Exception as e:
             print(f"Ошибка при создании таблицы: {e}")
-            self.connection.rollback()  # Откатываем изменения в случае ошибки
+            self.connection.rollback()
 
