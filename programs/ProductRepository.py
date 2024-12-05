@@ -14,19 +14,18 @@ class ProductRepository:
         data = [product.to_dict() for product in products]
         self.strategy.write(data)
 
+    def add_product(self, product: Product) -> None:
+        products = self.read_all()
+        if not Product.is_product_code_unique(product.product_code, products):
+            raise ValueError(f"Product with code {product.product_code} already exists.")
+        self.strategy.add(product)
+
     def get_by_id(self, product_id: int) -> Optional[Product]:
         products = self.read_all()
         for product in products:
             if product.product_id == product_id:
                 return product
         return None
-
-    def add_product(self, product: Product) -> None:
-        products = self.read_all()
-        if not Product.is_product_code_unique(product.product_code, products):
-            raise ValueError(f"Product with code {product.product_code} already exists.")
-        products.append(product)
-        self.write_all(products)
 
     def replace_product_by_id(self, product_id: int, new_product: Product):
         products = self.read_all()

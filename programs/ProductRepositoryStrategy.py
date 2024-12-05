@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 
-
 class ProductRepFileStrategy(ABC):
     @abstractmethod
     def read(self):
@@ -8,6 +7,10 @@ class ProductRepFileStrategy(ABC):
 
     @abstractmethod
     def write(self, data):
+        pass
+
+    @abstractmethod
+    def add(self, product):
         pass
 
     @abstractmethod
