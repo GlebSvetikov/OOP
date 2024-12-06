@@ -44,7 +44,6 @@ new_product = Product.create_new_product(
 )
 adapter = ProductRepositoryAdapter(json_repository)
 
-adapter.update_by_id(1,"govno","mamy",Decimal("15000.00"),2000,"mazut","579762")
 for product in json_repository.sort_by_field("stock_quantity",reverse=True):
     print (product)
 
