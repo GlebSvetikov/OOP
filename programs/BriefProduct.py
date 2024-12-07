@@ -55,7 +55,7 @@ class BriefProduct:
         return self.product_code == other.product_code
 
     def __str__(self):
-        return f"Product(name={self.name}, price={self.price}, product_code={self.product_code})"
+        return f"Product(product_id={self._product_id}, name={self.name}, price={self.price}, product_code={self.product_code})"
 
     def brief(self):
         return f"BriefProduct(product_id={self.product_id}, name={self.name}, price={self.price})"

@@ -44,6 +44,7 @@ class ProductRepository:
         end_index = start_index + k
         return [
             BriefProduct(
+                product_id=product['product_id'],
                 name=product['name'],
                 price=Decimal(product['price']),
                 product_code=product['product_code']
