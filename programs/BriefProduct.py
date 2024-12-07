@@ -1,6 +1,5 @@
-import json
+
 from decimal import Decimal
-from itertools import product
 from typing import Optional
 
 class BriefProduct:
@@ -53,8 +52,10 @@ class BriefProduct:
     def __eq__(self, other):
         if not isinstance(other, BriefProduct):
             return False
-        return (
-                self.product_code == other.product_code)
+        return self.product_code == other.product_code
+
+    def __str__(self):
+        return f"Product(name={self.name}, price={self.price}, product_code={self.product_code})"
 
     def brief(self):
         return f"BriefProduct(product_id={self.product_id}, name={self.name}, price={self.price})"

@@ -1,8 +1,8 @@
 from typing import List, Optional
 from decimal import Decimal
 from Product import Product
+from BriefProduct import BriefProduct
 from ProductRepositoryStrategy import ProductRepFileStrategy
-
 
 class ProductRepository:
     def __init__(self, strategy: ProductRepFileStrategy):
@@ -22,9 +22,15 @@ class ProductRepository:
         """Добавляет новый продукт в репозиторий"""
         product_dict = product.to_dict()
         products = [Product.create_from_dict(prod) for prod in self._data]
-        if not Product.check_unique_code(product.product_code, products):
+        if not self.check_unique_code(product, products):
             raise ValueError(f"Product already exists.")
         self._data.append(product_dict)
+
+    def check_unique_code(self, product, products):
+        for product_data in products:
+            if product_data == product:
+                 raise ValueError(f"Product already exists.")
+        return True
 
     def get_by_id(self, product_id: int) -> Optional[Product]:
         """Получить продукт по ID"""
@@ -33,17 +39,15 @@ class ProductRepository:
                 return Product.create_from_dict(product)
         return None
 
-    def get_k_n_short_list(self, k: int, n: int) -> List[dict]:
-        """Получить краткую информацию о товарах на странице n"""
+    def get_k_n_short_list(self, k: int, n: int) -> List[BriefProduct]:
         start_index = (n - 1) * k
         end_index = start_index + k
         return [
-            {
-                'product_id': product['product_id'],
-                'name': product['name'],
-                'price': Decimal(product['price']),
-                'product_code': product['product_code']
-            }
+            BriefProduct(
+                name=product['name'],
+                price=Decimal(product['price']),
+                product_code=product['product_code']
+            )
             for product in self._data[start_index:end_index]
         ]
 
@@ -62,7 +66,7 @@ class ProductRepository:
             raise ValueError(f"Product with ID {product_id} not found.")
 
         products = [Product.create_from_dict(prod) for prod in self._data]
-        if not Product.check_unique_code(product_code, products):
+        if not self.check_unique_code(product, products):
             raise ValueError(f"Product already exists.")
 
         if name:
@@ -93,5 +97,7 @@ class ProductRepository:
     def get_count(self) -> int:
         """Получить количество продуктов"""
         return len(self._data)
+
+
 
 

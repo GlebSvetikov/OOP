@@ -41,19 +41,19 @@ yaml_repository = ProductRepository(strategy)
 
 # Создание нового продукта
 new_product = Product.create_new_product(
-    name="Продукт 1123q2w4",
+    product_id= 3,
+    name="Продук",
     description="Описание продукта",
     price=Decimal('19.99'),
     stock_quantity=100,
     material="Пластик",
-    product_code="5876543"
+    product_code="5890000"
 )
 
-try:
-    yaml_repository.add_product(new_product)
-    print("Продукт добавлен.")
-except ValueError as e:
-    print(e)
+
+yaml_repository.add_product(new_product)
+
+yaml_repository.write_data()
 
 # Отображение обновленного списка продуктов
 print("\nUpdated products in YAML file:")
