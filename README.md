@@ -61,7 +61,8 @@ erDiagram
 **Таблица PRODUCT - Товар**
 
 ## Диаграмма классов
-![Untitled diagram-2024-12-06-130144](https://github.com/user-attachments/assets/ab825002-db98-4f72-875a-75366bdff9b6)
+![Untitled diagram-2024-12-07-202434](https://github.com/user-attachments/assets/f77930f5-d067-465f-867f-a4631903ea40)
+
 
 
 
