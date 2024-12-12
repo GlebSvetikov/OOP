@@ -8,6 +8,7 @@ class ProductRepository:
     def __init__(self, strategy: ProductRepFileStrategy):
         self._data = []
         self._strategy = strategy
+        self._valid_sort_fields = {'name', 'price', 'product_code'}
         self.read_data()
 
     def write_data(self):
@@ -28,8 +29,8 @@ class ProductRepository:
 
     def check_unique_code(self, product, products):
         for product_data in products:
-            if product_data == product:
-                 raise ValueError(f"Product already exists.")
+            if product_data == product and product_data.product_id != product.product_id:
+                raise ValueError(f"Product already exists.")
         return True
 
     def get_by_id(self, product_id: int) -> Optional[Product]:
@@ -39,9 +40,31 @@ class ProductRepository:
                 return Product.create_from_dict(product)
         return None
 
-    def get_k_n_short_list(self, k: int, n: int) -> List[BriefProduct]:
+    def get_k_n_short_list(self, k: int, n: int, sort_field: Optional[str] = None, sort_order: str = "ASC") -> List[
+        BriefProduct]:
+        # Проверка параметров сортировки
+        if sort_field and sort_field not in self._valid_sort_fields:
+            raise ValueError(f"Invalid sort field. Valid fields are: {', '.join(self._valid_sort_fields)}")
+        if sort_order.upper() not in ("ASC", "DESC"):
+            raise ValueError("Sort order must be either ASC or DESC")
+
+        # Получаем копию данных для сортировки
+        data = self._data.copy()
+
+        # Применяем сортировку, если указано поле
+        if sort_field:
+            reverse = sort_order.upper() == "DESC"
+            if sort_field == 'price':
+                data.sort(key=lambda x: Decimal(x['price']), reverse=reverse)
+            else:
+                data.sort(key=lambda x: x[sort_field], reverse=reverse)
+
+        # Применяем пагинацию
         start_index = (n - 1) * k
         end_index = start_index + k
+        page_data = data[start_index:end_index]
+
+        # Преобразуем в BriefProduct
         return [
             BriefProduct(
                 product_id=product['product_id'],
@@ -49,7 +72,7 @@ class ProductRepository:
                 price=Decimal(product['price']),
                 product_code=product['product_code']
             )
-            for product in self._data[start_index:end_index]
+            for product in page_data
         ]
 
     def sort_by_field(self, field: str, reverse: bool = False) -> List[Product]:
@@ -99,6 +122,6 @@ class ProductRepository:
         """Получить количество продуктов"""
         return len(self._data)
 
-
-
-
+    def get_all_products(self) -> List[Product]:
+        """Получить все продукты"""
+        return [Product.create_from_dict(product) for product in self._data]
