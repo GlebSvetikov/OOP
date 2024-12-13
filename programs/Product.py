@@ -7,9 +7,17 @@ from BriefProduct import BriefProduct
 
 class Product(BriefProduct):
     def __init__(self, product_id: Optional[int] = None, name: str = "", description: str = "",
-                 price: Decimal = Decimal(0),
-                 stock_quantity: int = 0, material: str = "", product_code: str = ""):
+                 price: Decimal = Decimal(0), stock_quantity: int = 0, material: str = "",
+                 product_code: str = ""):
+        # Вызываем конструктор родительского класса для базовой валидации
         super().__init__(product_id, name, price, product_code)
+
+        # Временные значения
+        self._description = ""
+        self._stock_quantity = 0
+        self._material = ""
+
+        # Устанавливаем значения через сеттеры для валидации
         self.description = description
         self.stock_quantity = stock_quantity
         self.material = material
@@ -45,9 +53,18 @@ class Product(BriefProduct):
         self._material = value
 
     @classmethod
-    def create_new_product(cls, product_id: Optional[int], name: str, description: str, price: Decimal, stock_quantity: int, material: str, product_code: str):
-        new_product = cls(product_id=product_id, name=name, description=description, price=price, stock_quantity=stock_quantity, material=material, product_code=product_code)
-        return new_product
+    def create_new_product(cls, product_id: Optional[int], name: str, description: str,
+                           price: Decimal, stock_quantity: int, material: str, product_code: str):
+        return cls(
+            product_id=product_id,
+            name=name,
+            description=description,
+            price=price,
+            stock_quantity=stock_quantity,
+            material=material,
+            product_code=product_code
+        )
+
 
     @classmethod
     def create_from_string(cls, product_string: str):
@@ -82,15 +99,32 @@ class Product(BriefProduct):
 
     @classmethod
     def create_from_dict(cls, data: dict):
+        """
+        Создает объект Product из словаря с валидацией всех полей.
+        """
         return cls(
             product_id=data.get('product_id'),
             name=data['name'],
             description=data['description'],
-            price=Decimal(data['price']),
+            price=Decimal(str(data['price'])),
             stock_quantity=data['stock_quantity'],
             material=data['material'],
             product_code=data['product_code']
         )
+
+    def to_dict(self) -> dict:
+        """
+        Преобразует объект в словарь.
+        """
+        return {
+            "product_id": self.product_id,
+            "name": self.name,
+            "description": self.description,
+            "price": str(self.price),
+            "stock_quantity": self.stock_quantity,
+            "material": self.material,
+            "product_code": self.product_code
+        }
 
     def to_json(self) -> str:
         return json.dumps({
@@ -127,16 +161,6 @@ class Product(BriefProduct):
             'product_code': self.product_code
         }, allow_unicode=True)
 
-    def to_dict(self) -> dict:
-        return {
-            "product_id": self.product_id,
-            "name": self.name,
-            "description": self.description,
-            "price": str(self.price),  # Convert Decimal to string for correct format
-            "stock_quantity": self.stock_quantity,
-            "material": self.material,
-            "product_code": self.product_code
-        }
 
     def __str__(self):
         return f"Product(productId={self.product_id}, name='{self.name}', description='{self.description}', price={self.price}, stockQuantity={self.stock_quantity}, material='{self.material}', productCode='{self.product_code}')"

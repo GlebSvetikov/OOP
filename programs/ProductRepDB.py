@@ -81,33 +81,27 @@ class ProductRepDB(Observable):
             raise Exception("An unexpected error occurred while adding the product.")
 
     def update_by_id(self, product_id: int, product: Product) -> bool:
-        try:
-            with self.db.cursor() as cursor:
-                sql = """
-                    UPDATE products
-                    SET name = %s, description = %s, price = %s, 
-                        stock_quantity = %s, material = %s, product_code = %s
-                    WHERE product_id = %s
-                """
-                cursor.execute(sql, (
-                    product.name,
-                    product.description,
-                    str(product.price),
-                    product.stock_quantity,
-                    product.material,
-                    product.product_code,
-                    product_id
-                ))
-                self.db.commit()
-                success = cursor.rowcount > 0
-                if success:
-                    self.notify_observers()
-                return success
-        except MySQLError as e:
-            if e.args[0] == 1062:  # Duplicate entry
-                raise ValueError(f"Product with code {product.product_code} already exists.")
-            raise Exception("An unexpected error occurred while updating the product.")
-
+        with self.db.cursor() as cursor:
+            sql = """
+                UPDATE products
+                SET name = %s, description = %s, price = %s, 
+                    stock_quantity = %s, material = %s, product_code = %s
+                WHERE product_id = %s
+            """
+            cursor.execute(sql, (
+                product.name,
+                product.description,
+                str(product.price),
+                product.stock_quantity,
+                product.material,
+                product.product_code,
+                product_id
+            ))
+            self.db.commit()
+            success = cursor.rowcount > 0
+            if success:
+                self.notify_observers()
+            return success
 
     def product_delete_by_id(self, product_id: int) -> bool:
         with self.db.cursor() as cursor:
