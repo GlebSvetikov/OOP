@@ -39,5 +39,4 @@ class AddEditProductController:
 
         except ValueError as e:
             self.view.show_error(f"Validation error: {str(e)}")
-        except Exception as e:
-            self.view.show_error(f"Error saving product: {str(e)}")
+
